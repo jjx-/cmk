@@ -1,0 +1,20 @@
+#!/bin/bash
+#CheckMK Agent Plugin for Proxmox VE
+#Build by JJX
+#Tested on Check MK 1.5.0p6
+#Tested on Proxmox 5.x
+echo '<<<proxmox>>>'
+vmlist=$(qm list|grep -v 'VMID')
+while read -r i;
+do
+        vmid=$(echo $i|awk '{print $1}')
+        vmname=$(echo $i|awk '{print $2}')
+        vmstate=$(echo $i|awk '{print $3}')
+        vmram=$(echo $i|awk '{print $4}')
+        vmbootdisk=$(echo $i|awk '{print $5}')
+        vmpid=$(echo $i|awk '{print $6}')
+        vmsnapshotcount=$(qm listsnapshot $vmid|grep -c -v 'You are here!')
+        vmcpuusage=$(top -b -n 1 -p $vmpid | tail -1|awk '{print $9}')
+        vmramusage=$(top -b -n 1 -p $vmpid | tail -1|awk '{print $10}')
+        echo "$vmid $vmname $vmstate $vmram $vmcpuusage $vmramusage $vmsnapshotcount $vmbootdisk"
+done <<< "$vmlist"
